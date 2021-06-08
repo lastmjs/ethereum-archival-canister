@@ -1,0 +1,18 @@
+{
+    "scripts": {
+        "build": "cd canisters/playground && npm install && npm run build",
+        "geth-light-sync": ". ./.env && docker run -it -p 8545:8545 -v $GETH_DATA_PATH:/root ethereum/client-go --syncmode light --cache 2048 --http --http.addr 0.0.0.0 --graphql",
+        "geth-no-sync": ". ./.env && docker run -it -p 8545:8545 -v $GETH_DATA_PATH:/root ethereum/client-go --syncmode light --cache 2048 --maxpeers 0 --http --http.addr 0.0.0.0 --graphql",
+        "import-block-headers": "ts-node --transpile-only importers/importer-block-headers.ts"
+    },
+    "devDependencies": {
+        "@types/node": "15.12.2",
+        "@types/node-fetch": "2.5.10"
+    },
+    "dependencies": {
+        "node-fetch": "2.6.1",
+        "sudograph": "0.2.0-beta.22",
+        "ts-node": "10.0.0",
+        "typescript": "4.3.2"
+    }
+}

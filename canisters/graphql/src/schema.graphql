@@ -1,0 +1,109 @@
+# TODO Most of this is based directly off of eip-1767 found here: https://eips.ethereum.org/EIPS/eip-1767
+# TODO geth adds some fields to Transaction, and changes a type or two
+# TODO I would really like to avoid having to lgpl license the Ethereum canister, for now I do not believe
+# TODO we would need to because everything is based entirely off of the CC0 eip-1767
+# TODO if we start copying more of what geth is doing, I think the chances of having to do the lgpl license
+# TODO we might be okay with the GraphQL schema though, we'll see
+# TODO once we move on to the EVM implementation it might become inevitable to use a gpl or lgpl license
+# TODO most of the clients seem to use either gpl or lgpl
+# TODO the biggest missing feature to build out the Ethereum Archival Canister is custom scalars
+
+# type Account {
+#     id: ID!
+#     address: String!
+# }
+
+type Block {
+    id: ID!
+    number: Int!
+    hash: String!
+    parentHash: String!
+    # parent: [Block!]! # TODO because I don't have self-referencing I am emulating this
+    # parent: Block
+    # transactionsRoot: String!
+    # transactionCount: Int!
+    # stateRoot: String!
+    # timestamp: Date
+    # transactions: [Transaction!]! @relation(name: "block:transactions and transaction:block")
+}
+
+# type Transaction {
+#     id: ID!
+#     hash: String!
+#     index: Int!
+#     from: Account!
+#     to: Account!
+#     value: String!
+#     gasPrice: String!
+#     gas: String!
+#     inputData: String!
+#     block: Block! @relation(name: "block:transactions and transaction:block")
+#     status: Int!
+#     gasUsed: Int!
+# }
+
+# TODO below we have the original schema, we can slowly reflect this as Sudograph gains features
+
+# type Account {
+#     address: Address!
+#     balance: BigInt!
+#     transactionCount: Long!
+#     code: Bytes!
+#     storage(slot: Bytes32!): Bytes32!
+# }
+
+# type Block {
+#     number: Long!
+#     hash: Bytes32!
+#     parent: Block
+#     nonce: Bytes!
+#     transactionsRoot: Bytes32!
+#     transactionCount: Int
+#     stateRoot: Bytes32!
+#     receiptsRoot: Bytes32!
+#     miner(block: Long): Account!
+#     extraData: Bytes!
+#     gasLimit: Long!
+#     gasUsed: Long!
+#     timestamp: BigInt!
+#     logsBloom: Bytes!
+#     mixHash: Bytes32!
+#     difficulty: BigInt!
+#     totalDifficulty: BigInt!
+#     ommerCount: Int
+#     ommers: [Block]
+#     ommerAt(index: Int!): Block
+#     ommerHash: Bytes32!
+#     transactions: [Transaction!]
+#     transactionAt(index: Int!): Transaction
+#     logs(filter: BlockFilterCriteria!): [Log!]!
+#     account(address: Address!): Account
+#     call(data: CallData!): CallResult
+#     estimateGas(data: CallData!): Long!
+# }
+
+# type Log {
+#     index: Int!
+#     account(block: Long): Account!
+#     topics: [Bytes32!]!
+#     data: Bytes!
+#     transaction: Transaction!
+# }
+
+# type Transaction {
+#     hash: Bytes32!
+#     nonce: Long!
+#     index: Int
+#     from(block: Long): Account!
+#     to(block: Long): Account
+#     value: BigInt!
+#     gasPrice: BigInt!
+#     gas: Long!
+#     inputData: Bytes!
+#     block: Block
+#     status: Long
+#     gasUsed: Long
+#     cumulativeGasUsed: Long
+#     createdContract(block: Long): Account
+#     logs: [Log!]
+# }
