@@ -30,79 +30,94 @@ importBlockHeaders();
 
 async function importBlockHeaders() {
     try {
-        const fileStream = fs.createReadStream('ethereum-etl/blocks-test.json');
+        const numLines = await getNumLines('ethereum-etl/blocks-0-1000000/blocks.json');
+        const batchSize = 10000;
 
-        fileStream.on('error', (error) => {
-            console.log(error);
-        });
+        for (let i=0; i < numLines; i += batchSize) {
+            console.log(`creating batch mutation for blocks ${i} - ${i + batchSize - 1}`);
+
+            const batchMutation = await getBatchMutation(
+                i,
+                batchSize
+            );
+            
+            const graphqlActor = await getGraphQLActor();
     
-        const readlineInterface = readline.createInterface({
-            input: fileStream
-        });
+            const startTime = new Date().getTime();
+            console.log(`Saving blocks ${i} - ${i + batchSize - 1}`);
     
-        const graphqlActor = await getGraphQLActor();
+            await graphqlActor.graphql_mutation(
+                batchMutation,
+                JSON.stringify({})
+            );
     
-        console.log('about to rad lines');
-    
-        const lines = await getLines(
-            readlineInterface,
-            10
-        );
-    
-        console.log('rad lines');
-    
-        console.log(lines);
-        console.log(lines.length);
-    
-        // // TODO this does one line at a time, we will want to do many lines at a time
-        // for await (const line of readlineInterface) {
-        //     const block = JSON.parse(line);
-    
-        //     const startTime = new Date().getTime();
-        //     console.log(`Saving block ${block.number}`);
-        
-        //     await graphqlActor.graphql_mutation(`
-        //         mutation (
-        //             $number: Int!
-        //             $hash: String!
-        //             $parentHash: String!
-        //         ) {
-        //             createBlock(input: {
-        //                 number: $number
-        //                 hash: $hash
-        //                 parentHash: $parentHash
-        //             }) {
-        //                 id
-        //             }
-        //         }
-        //     `, JSON.stringify({
-        //         number: block.number,
-        //         hash: block.hash,
-        //         parentHash: block.parent_hash
-        //     }));
-    
-        //     const endTime = new Date().getTime();
-        //     console.log(`Saved block ${block.number} in ${(endTime - startTime) / 1000} seconds`);
-        // }
+            const endTime = new Date().getTime();
+            console.log(`Saved blocks ${i} - ${i + batchSize - 1} in ${(endTime - startTime) / 1000} seconds`);
+        }
     }
     catch(error) {
         console.log(error);
     }
 }
 
+async function getBatchMutation(
+    startLineNumber: number,
+    numLines: number
+): Promise<string> {
+    const lines = await getLines(
+        startLineNumber,
+        numLines
+    );
+
+    const blocks = convertLinesIntoBlocks(lines);
+    const mutations = convertBlocksIntoMutations(blocks);
+
+    return `
+        mutation {
+            ${mutations.join('\n')}
+        }
+    `;
+}
+
+function convertBlocksIntoMutations(blocks: ReadonlyArray<Block>): ReadonlyArray<string> {
+    return blocks.map((block: Block) => {
+        return convertBlockIntoMutation(block);
+    });
+}
+
+function convertBlockIntoMutation(block: Block): string {
+    return `
+        createBlock${block.number}: createBlock(input: {
+            number: ${block.number}
+            hash: "${block.hash}"
+            parentHash: "${block.parent_hash}"
+        }) {
+            id
+        }
+    `;
+}
+
+// TODO these mutations are kind of gross, but this seems the best way to consume a stream with async/await
 async function getLines(
-    readlineInterface: readline.Interface,
+    startLineNumber: number,
     numLines: number
 ): Promise<ReadonlyArray<string>> {
-    console.log('getLines');
+    let fastForwardIndex = 0;
     let index = 0;
     let lines: Array<string> = [];
 
-    console.log('starting to iterate');
-    console.log('index', index);
-    console.log('numLines', numLines);
+    const fileStream = fs.createReadStream('ethereum-etl/blocks-0-1000000/blocks.json');
+    
+    const readlineInterface = readline.createInterface({
+        input: fileStream
+    });
+
     for await (const line of readlineInterface) {
-        console.log('iterating', line);
+        if (fastForwardIndex < startLineNumber) {
+            fastForwardIndex += 1;
+            continue;
+        }
+
         if (index === numLines) {
             return lines;
         }
@@ -110,9 +125,26 @@ async function getLines(
         index += 1;
         lines.push(line);
     }
-    console.log('finished iterating');
 
     return lines;
+}
+
+async function getNumLines(
+    filename: string
+): Promise<number> {
+    const fileStream = fs.createReadStream(filename);
+    
+    const readlineInterface = readline.createInterface({
+        input: fileStream
+    });
+
+    let index = 0;
+
+    for await (const line of readlineInterface) {
+        index += 1;
+    }
+
+    return index;
 }
 
 function convertLinesIntoBlocks(lines: ReadonlyArray<string>): ReadonlyArray<Block> {
