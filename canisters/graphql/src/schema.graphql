@@ -18,29 +18,28 @@ type Block {
     number: Int!
     hash: String!
     parentHash: String!
-    # parent: [Block!]! # TODO because I don't have self-referencing I am emulating this
-    # parent: Block
-    # transactionsRoot: String!
-    # transactionCount: Int!
-    # stateRoot: String!
-    # timestamp: Date
-    # transactions: [Transaction!]! @relation(name: "block:transactions and transaction:block")
+    transactionsRoot: String!
+    transactionCount: Int!
+    stateRoot: String!
+    gasLimit: String!
+    gasUsed: String!
+    timestamp: Date!
+    transactions: [Transaction!]! @relation(name: "block:transactions and transaction:block")
 }
 
-# type Transaction {
-#     id: ID!
-#     hash: String!
-#     index: Int!
-#     from: Account!
-#     to: Account!
-#     value: String!
-#     gasPrice: String!
-#     gas: String!
-#     inputData: String!
-#     block: Block! @relation(name: "block:transactions and transaction:block")
-#     status: Int!
-#     gasUsed: Int!
-# }
+type Transaction {
+    id: ID!
+    hash: String!
+    index: Int!
+    from: String!
+    to: String!
+    value: String!
+    gasPrice: String!
+    gas: String!
+    inputData: String!
+    block: Block! @relation(name: "block:transactions and transaction:block")
+    gasUsed: String!
+}
 
 # TODO below we have the original schema, we can slowly reflect this as Sudograph gains features
 
