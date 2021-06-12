@@ -17,7 +17,7 @@ type Block {
     id: ID!
     number: Int!
     hash: String!
-    parentHash: String!
+    parent: Block
     transactionsRoot: String!
     transactionCount: Int!
     stateRoot: String!

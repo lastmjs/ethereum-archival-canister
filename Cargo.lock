@@ -1298,9 +1298,9 @@ checksum = "73473c0e59e6d5812c5dfe2a064a6444949f089e20eec9a2e5506596494e4623"
 
 [[package]]
 name = "sudodb"
-version = "0.2.0-beta.22"
+version = "0.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "aa2dbf5628a6c9ab52a0ca53f47e46e3782d1e3b1c6810e087816673280d8254"
+checksum = "631dc3b46e631c87479555a3f9bd29aadc4ed7b7cf894727519c8ec0dac0d5fa"
 dependencies = [
  "base32",
  "chrono",
@@ -1311,9 +1311,9 @@ dependencies = [
 
 [[package]]
 name = "sudograph"
-version = "0.2.0-beta.22"
+version = "0.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f49e44c8efb03556dd0e89ee9c3f25deccdf74a19861d7ea37525435d7c2f0c2"
+checksum = "c0906cc56a868348fbe054bf8e7139be9156cfc080b7bb95eb848601fecc88ba"
 dependencies = [
  "async-graphql",
  "getrandom 0.2.3",
@@ -1328,9 +1328,9 @@ dependencies = [
 
 [[package]]
 name = "sudograph-generate"
-version = "0.2.0-beta.22"
+version = "0.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c9ac1f0527cd140fc34d7214a456bf31153502b332edc6759ea4d5ed2e50aecf"
+checksum = "1d9eb751638c7a24a6155025d46c90fc41132482bad7d5ac72ac4054340475c7"
 dependencies = [
  "graphql-parser",
  "proc-macro2",

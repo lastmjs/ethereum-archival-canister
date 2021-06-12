@@ -69,13 +69,13 @@ export async function getGraphQLActor() {
 
     const agent = new HttpAgent({
         fetch,
-        // host: 'http://localhost:8000',
-        host: 'https://ic0.app'
+        host: 'http://localhost:8000',
+        // host: 'https://ic0.app'
     });
     await agent.fetchRootKey(); // TODO this should be removed in production
     const graphqlActor = Actor.createActor(idlFactory, {
         agent,
-        canisterId: 'imzdt-lyaaa-aaaae-qaaja-cai'
+        canisterId: 'rrkah-fqaaa-aaaaa-aaaaq-cai'
     });
 
     return graphqlActor;

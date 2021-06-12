@@ -65,6 +65,8 @@ async function importBlockHeaders() {
                 JSON.stringify({})
             );
 
+            // console.log(result);
+
             // TODO add better error handling
             // if ((
             //     result.errors !== null &&
@@ -96,7 +98,7 @@ async function getBatchMutation(
     );
 
     const blocks = convertLinesIntoBlocks(lines);
-    const mutations = convertBlocksIntoMutations(blocks);
+    const mutations = await convertBlocksIntoMutations(blocks);
 
     return `
         mutation {
@@ -115,19 +117,50 @@ function convertLineIntoBlock(line: string): Block {
     return JSON.parse(line);
 }
 
-function convertBlocksIntoMutations(blocks: ReadonlyArray<Block>): ReadonlyArray<string> {
-    return blocks.map((block: Block) => {
+async function convertBlocksIntoMutations(blocks: ReadonlyArray<Block>): Promise<ReadonlyArray<string>> {
+    const promises = blocks.map(async (block: Block) => {
         return convertBlockIntoMutation(block);
     });
+
+    return await Promise.all(promises);
 }
 
-function convertBlockIntoMutation(block: Block): string {
+async function convertBlockIntoMutation(block: Block): Promise<string> {
+    const graphqlActor = await getGraphQLActor();
+
+    const result: any = await graphqlActor.graphql_query(
+        `
+            query {
+                readBlock(input: {
+                    hash: {
+                        eq: "${block.parent_hash}"
+                    }
+                }) {
+                    id
+                }
+            }
+        `,
+        JSON.stringify({})
+    );
+
+    const resultJSON = JSON.parse(result);
+
+    console.log('resultJSON', resultJSON);
+
+    const parentBlockId = resultJSON.data?.readBlock[0]?.id ?? null;
+    
+    console.log('parentBlockId', parentBlockId);
+
     return `
         createBlock${block.number}: createBlock(input: {
             id: "${block.number}"
             number: ${block.number}
             hash: "${block.hash}"
-            parentHash: "${block.parent_hash}"
+            ${parentBlockId === null ? '' : `
+                parent: {
+                    connect: "${parentBlockId}"
+                }
+            `}
             transactionsRoot: "${block.transactions_root}"
             transactionCount: ${block.transaction_count}
             stateRoot: "${block.state_root}"
