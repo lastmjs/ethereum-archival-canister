@@ -15,45 +15,37 @@ let mirroring = false;
 let currentlyMirroringTicks = 0;
 
 setInterval(async () => {
-    try {
-        if (mirroring === true) {
-            console.log('currently mirroring', new Date());
-            console.log('currentlyMirroringTicks', currentlyMirroringTicks);
-            currentlyMirroringTicks += 1;
+    if (mirroring === true) {
+        console.log('currently mirroring', new Date());
+        console.log('currentlyMirroringTicks', currentlyMirroringTicks);
+        currentlyMirroringTicks += 1;
 
-            if (currentlyMirroringTicks >= 60) {
-                require('child_process').exec('sudo reboot');
-            }
-
-            return;
+        if (currentlyMirroringTicks >= 60) {
+            require('child_process').exec('sudo reboot');
         }
-        
-        console.log('importing live blocks');
-    
-        currentlyMirroringTicks = 0;
-        mirroring = true;
-    
-        const latestMirroredBlockNumber = await getLatestMirroredBlockNumber();
-        console.log('latestMirroredBlockNumber', latestMirroredBlockNumber);
-        const fromBlock = latestMirroredBlockNumber === 0 ? await getLatestBlockNumber() : latestMirroredBlockNumber + 1;
-        console.log('fromBlock', fromBlock);
-        const blocksToMirror = await getBlocksToMirror(fromBlock);
-        console.log('blocksToMirror.length', blocksToMirror.length);
-    
-        await mirrorBlocks(blocksToMirror);
-        console.log('blocks mirrored');
-        await deleteBlocks();
-        console.log('blocks deleted');
-        console.log();
-    
-        mirroring = false;
+
+        return;
     }
-    catch(error) {
-        mirroring = false;
-        
-        console.error(error); // TODO this might not be the best way to handle the error
-        // TODO perhaps we should restart the whole process??
-    }
+    
+    console.log('importing live blocks');
+
+    currentlyMirroringTicks = 0;
+    mirroring = true;
+
+    const latestMirroredBlockNumber = await getLatestMirroredBlockNumber();
+    console.log('latestMirroredBlockNumber', latestMirroredBlockNumber);
+    const fromBlock = latestMirroredBlockNumber === 0 ? await getLatestBlockNumber() : latestMirroredBlockNumber + 1;
+    console.log('fromBlock', fromBlock);
+    const blocksToMirror = await getBlocksToMirror(fromBlock);
+    console.log('blocksToMirror.length', blocksToMirror.length);
+
+    await mirrorBlocks(blocksToMirror);
+    console.log('blocks mirrored');
+    await deleteBlocks();
+    console.log('blocks deleted');
+    console.log();
+
+    mirroring = false;
 }, 1000);
 // TODO consider block reorgs and such, I am not sure what to do in that case
 
