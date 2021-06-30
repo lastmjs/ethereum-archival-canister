@@ -9,13 +9,23 @@
         "import-live-blocks": ". ./.env && ts-node --transpile-only importers/importer-live-blocks.ts",
         "start-live-block-importing-ic": "pm2 start npm --name geth-light-sync-ec2 -- run geth-light-sync-ec2 && pm2 start npm --name import-live-blocks -- run import-live-blocks",
         "ec2-mirror-deploy": "aws cloudformation deploy --template ec2/mirror.yml --stack-name ethereum-archival-canister-mirror",
-        "ec2-mirror-ssh": "ssh -A -i ec2/ethereum-archival-canister-mirror.pem ubuntu@18.237.217.125"
+        "ec2-mirror-ssh": "ssh -A -i ec2/ethereum-archival-canister-mirror.pem ubuntu@18.237.217.125",
+        "dfx-deploy": "npm run dfx-build-graphql && npm run dfx-optimize-graphql && dfx deploy",
+        "dfx-deploy-graphql": "npm run dfx-build-graphql && npm run dfx-optimize-graphql && dfx deploy graphql",
+        "dfx-deploy-ic": "npm run dfx-build-graphql && npm run dfx-optimize-graphql && dfx deploy --network ic",
+        "dfx-deploy-graphql-ic": "npm run dfx-build-graphql && npm run dfx-optimize-graphql && dfx deploy graphql --network ic",
+        "dfx-build-graphql": "cargo build --target wasm32-unknown-unknown --package graphql --release",
+        "dfx-optimize-graphql": "./target/bin/ic-cdk-optimizer ./target/wasm32-unknown-unknown/release/graphql.wasm -o ./target/wasm32-unknown-unknown/release/graphql-optimized.wasm",
+        "generate-identity": "ts-node --transpile-only generate-identity.ts"
     },
     "devDependencies": {
         "@types/node": "15.12.2",
         "@types/node-fetch": "2.5.10"
     },
     "dependencies": {
+        "@dfinity/candid": "0.9.1",
+        "@dfinity/identity": "0.9.1",
+        "@dfinity/principal": "0.9.1",
         "node-fetch": "2.6.1",
         "pm2": "5.1.0",
         "sudograph": "0.2.0-beta.22",

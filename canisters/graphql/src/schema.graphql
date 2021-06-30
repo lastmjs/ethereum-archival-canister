@@ -13,6 +13,10 @@
 #     address: String!
 # }
 
+type SudographSettings {
+    exportGeneratedMutationFunction: false
+}
+
 type Block {
     id: ID!
     number: Int!

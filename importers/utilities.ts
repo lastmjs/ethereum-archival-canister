@@ -4,6 +4,7 @@ import {
     Actor,
     HttpAgent
 } from '@dfinity/agent';
+import { Ed25519KeyIdentity } from '@dfinity/identity';
 
 // import * as fetch from 'node-fetch'; // TODO types were messed up, commenting out for convenience
 const fetch = require('node-fetch');
@@ -64,16 +65,18 @@ export async function getGraphQLActor() {
     const idlFactory = ({ IDL }: { IDL: any }) => {
         return IDL.Service({
             graphql_query: IDL.Func([IDL.Text, IDL.Text], [IDL.Text], ['query']),
-            graphql_mutation: IDL.Func([IDL.Text, IDL.Text], [IDL.Text], [])
+            graphql_mutation_custom: IDL.Func([IDL.Text, IDL.Text], [IDL.Text], [])
         });
     };
 
+    const identityJSONString = require('fs').readFileSync('ec2/identity.json').toString();
+    const identity = Ed25519KeyIdentity.fromJSON(identityJSONString);
+
     // TODO next I need to figure out auth so that only the EC2 instance can do mutations
     const agent = new HttpAgent({
+        identity,
         fetch,
         host: process.env.HTTP_AGENT_HOST
-        // host: 'http://localhost:8000',
-        // host: 'https://ic0.app'
     });
     await agent.fetchRootKey(); // TODO this should be removed in production
     const graphqlActor = Actor.createActor(idlFactory, {

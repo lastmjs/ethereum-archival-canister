@@ -7,3 +7,4 @@ build
 geth-data
 ethereum-etl
 ec2/ethereum-archival-canister-mirror.pem
+ec2/identity.json

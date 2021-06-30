@@ -183,7 +183,7 @@ async function mirrorBlocks(blocks: ReadonlyArray<GethBlock>): Promise<void> {
     
         const graphqlActor = await getGraphQLActor();
     
-        const resultString = await graphqlActor.graphql_mutation(mutation, '{}') as string;
+        const resultString = await graphqlActor.graphql_mutation_custom(mutation, '{}') as string;
         const resultJSON = JSON.parse(resultString);
         
         checkResultForErrors(resultJSON);
@@ -238,7 +238,7 @@ async function deleteBlocks(): Promise<void> {
 
     const graphqlActor = await getGraphQLActor();
 
-    const resultString = await graphqlActor.graphql_mutation(mutation, '{}') as string;
+    const resultString = await graphqlActor.graphql_mutation_custom(mutation, '{}') as string;
 
     const resultJSON = JSON.parse(resultString);
 
