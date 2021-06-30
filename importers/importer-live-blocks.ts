@@ -213,31 +213,22 @@ async function deleteBlocks(): Promise<void> {
     // TODO Right now I just want the thing to work and be robust, so it is very simple
     // TODO but not optimizing for cycle usage
     const targetAllowedBlocks = 10;
-    const deleteBatchSize = 2;
+    const deleteBatchSize = 5;
 
     if (numMirroredBlocks < targetAllowedBlocks + deleteBatchSize) {
         return;
     }
 
-    console.log('getting blocks to delete');
-
-    // TODO do the await promise all thing here, increase the batch size
     const blocksToDelete = await getBlocksToDelete(
         firstMirroredBlockNumber,
         firstMirroredBlockNumber + deleteBatchSize
     );
 
     const promises = blocksToDelete.map(async (blockToDelete) => {
-        const blockIdsToDelete = blocksToDelete.map((block) => {
-            return `"${block.id}"`;
-        });
-    
-        console.log('blockIdsToDelete', blockIdsToDelete);
-    
+        console.log('deleting block', blockToDelete.id);
+        
         const transactionIdsToDelete = blockToDelete.transactions.map((transactionToDelete) => `"${transactionToDelete.id}"`);
-    
-        console.log('transactionIdsToDelete', transactionIdsToDelete);
-    
+        
         const mutation = `
             mutation {
                 deleteTransaction(input: {
@@ -261,6 +252,8 @@ async function deleteBlocks(): Promise<void> {
         const resultJSON = JSON.parse(resultString);
     
         checkResultForErrors(resultJSON);
+
+        console.log('deleted block', blockToDelete.id);
     });
 
     await Promise.all(promises);
