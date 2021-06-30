@@ -13,6 +13,6 @@ Resources:
       GroupName: EC2MirrorSecurityGroup
       GroupDescription: EC2MirrorSecurityGroup
       # TODO and make sure to only allow specific ip addresses?? I might want to hide my ip address from the open source repo though
-      # SecurityGroupIngress: # TODO I think we only need to change the security group to allow ssh or not...otherwise it can be cutoff?? It only needs outbound capabilities
-        # - CidrIp: 0.0.0.0/0
-          # IpProtocol: -1
+      SecurityGroupIngress: # TODO I think we only need to change the security group to allow ssh or not...otherwise it can be cutoff?? It only needs outbound capabilities
+        - CidrIp: 0.0.0.0/0
+          IpProtocol: -1

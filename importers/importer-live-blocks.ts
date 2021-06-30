@@ -135,6 +135,7 @@ async function mirrorBlocks(blocks: ReadonlyArray<GethBlock>): Promise<void> {
     }
 
     for (const block of blocks) {
+        console.log('mirroring block', block.number);
         const mutation = `
             mutation {
                 createBlock(input: {
@@ -187,6 +188,8 @@ async function mirrorBlocks(blocks: ReadonlyArray<GethBlock>): Promise<void> {
         const resultJSON = JSON.parse(resultString);
         
         checkResultForErrors(resultJSON);
+
+        console.log('mirrored block', block.number);
     }
 }
 
