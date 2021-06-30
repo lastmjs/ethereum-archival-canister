@@ -2,11 +2,12 @@
     "scripts": {
         "build": "cd canisters/playground && npm install && npm run build",
         "geth-light-sync": ". ./.env && docker run -it -p 8545:8545 -v $GETH_DATA_PATH:/root ethereum/client-go --syncmode light --cache 2048 --http --http.addr 0.0.0.0 --graphql",
+        "geth-light-sync-ec2": ". ./.env && docker run -p 8545:8545 -v $GETH_DATA_PATH:/root ethereum/client-go --syncmode light --cache 2048 --http --http.addr 0.0.0.0 --graphql",
         "geth-no-sync": ". ./.env && docker run -it -p 8545:8545 -v $GETH_DATA_PATH:/root ethereum/client-go --syncmode light --cache 2048 --maxpeers 0 --http --http.addr 0.0.0.0 --graphql",
         "import-block-headers": "ts-node --transpile-only importers/importer-block-headers.ts",
         "import-block-transactions": "ts-node --transpile-only importers/importer-block-transactions.ts",
         "import-live-blocks": ". ./.env && ts-node --transpile-only importers/importer-live-blocks.ts",
-        "start-live-block-importing-ic": "pm2 start npm --name geth-light-sync -- run geth-light-sync && pm2 start npm --name import-live-blocks -- run import-live-blocks",
+        "start-live-block-importing-ic": "pm2 start npm --name geth-light-sync-ec2 -- run geth-light-sync-ec2 && pm2 start npm --name import-live-blocks -- run import-live-blocks",
         "ec2-mirror-deploy": "aws cloudformation deploy --template ec2/mirror.yml --stack-name ethereum-archival-canister-mirror",
         "ec2-mirror-ssh": "ssh -A -i ec2/ethereum-archival-canister-mirror.pem ubuntu@18.237.217.125"
     },
