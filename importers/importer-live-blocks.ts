@@ -18,6 +18,7 @@ setInterval(async () => {
     try {
         if (mirroring === true) {
             console.log('currently mirroring', new Date());
+            console.log('currentlyMirroringTicks', currentlyMirroringTicks);
             currentlyMirroringTicks += 1;
 
             if (currentlyMirroringTicks >= 60) {
