@@ -12,16 +12,24 @@ import {
 const fetch = require('node-fetch');
 
 let mirroring = false;
+let currentlyMirroringTicks = 0;
 
 setInterval(async () => {
     try {
         if (mirroring === true) {
             console.log('currently mirroring', new Date());
+            currentlyMirroringTicks += 1;
+
+            if (currentlyMirroringTicks >= 60) {
+                require('child_process').exec('sudo reboot');
+            }
+
             return;
         }
         
         console.log('importing live blocks');
     
+        currentlyMirroringTicks = 0;
         mirroring = true;
     
         const latestMirroredBlockNumber = await getLatestMirroredBlockNumber();
