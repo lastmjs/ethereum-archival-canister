@@ -213,57 +213,57 @@ async function deleteBlocks(): Promise<void> {
     // TODO Right now I just want the thing to work and be robust, so it is very simple
     // TODO but not optimizing for cycle usage
     const targetAllowedBlocks = 10;
-    const deleteBatchSize = 1;
+    const deleteBatchSize = 2;
 
-    if (numMirroredBlocks <= targetAllowedBlocks) {
+    if (numMirroredBlocks < targetAllowedBlocks + deleteBatchSize) {
         return;
     }
 
     console.log('getting blocks to delete');
 
+    // TODO do the await promise all thing here, increase the batch size
     const blocksToDelete = await getBlocksToDelete(
         firstMirroredBlockNumber,
         firstMirroredBlockNumber + deleteBatchSize
     );
 
-    const blockIdsToDelete = blocksToDelete.map((block) => {
-        return `"${block.id}"`;
+    const promises = blocksToDelete.map(async (blockToDelete) => {
+        const blockIdsToDelete = blocksToDelete.map((block) => {
+            return `"${block.id}"`;
+        });
+    
+        console.log('blockIdsToDelete', blockIdsToDelete);
+    
+        const transactionIdsToDelete = blockToDelete.transactions.map((transactionToDelete) => `"${transactionToDelete.id}"`);
+    
+        console.log('transactionIdsToDelete', transactionIdsToDelete);
+    
+        const mutation = `
+            mutation {
+                deleteTransaction(input: {
+                    ids: [${transactionIdsToDelete.join(',')}]
+                }) {
+                    id
+                }
+    
+                deleteBlock(input: {
+                    id: "${blockToDelete.id}"
+                }) {
+                    id
+                }
+            }
+        `;
+    
+        const graphqlActor = await getGraphQLActor();
+    
+        const resultString = await graphqlActor.graphql_mutation_custom(mutation, '{}') as string;
+    
+        const resultJSON = JSON.parse(resultString);
+    
+        checkResultForErrors(resultJSON);
     });
 
-    console.log('blockIdsToDelete', blockIdsToDelete);
-
-    const transactionIdsToDelete = blocksToDelete.reduce((result: ReadonlyArray<string>, block) => {
-        return [
-            ...result,
-            ...block.transactions.map((transaction) => `"${transaction.id}"`)
-        ];
-    }, []);
-
-    console.log('transactionIdsToDelete', transactionIdsToDelete);
-
-    const mutation = `
-        mutation {
-            deleteTransaction(input: {
-                ids: [${transactionIdsToDelete.join(',')}]
-            }) {
-                id
-            }
-
-            deleteBlock(input: {
-                ids: [${blockIdsToDelete.join(',')}]
-            }) {
-                id
-            }
-        }
-    `;
-
-    const graphqlActor = await getGraphQLActor();
-
-    const resultString = await graphqlActor.graphql_mutation_custom(mutation, '{}') as string;
-
-    const resultJSON = JSON.parse(resultString);
-
-    checkResultForErrors(resultJSON);
+    await Promise.all(promises);
 }
 
 async function getFirstMirroredBlockNumber(): Promise<number> {
