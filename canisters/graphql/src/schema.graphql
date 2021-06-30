@@ -19,12 +19,12 @@ type Block {
     hash: String!
     parent: Block
     transactionsRoot: String!
-    transactionCount: Int!
+    transactionCount: Int
     stateRoot: String!
     gasLimit: String!
     gasUsed: String!
     timestamp: Date!
-    transactions: [Transaction!]! @relation(name: "block:transactions and transaction:block")
+    transactions: [Transaction!]! @relation(name: "Block:transactions::Transaction:block")
 }
 
 type Transaction {
@@ -32,13 +32,13 @@ type Transaction {
     hash: String!
     index: Int!
     from: String!
-    to: String!
+    to: String
     value: String!
     gasPrice: String!
     gas: String!
     inputData: String!
-    block: Block! @relation(name: "block:transactions and transaction:block")
-    gasUsed: String!
+    block: Block @relation(name: "Block:transactions::Transaction:block")
+    gasUsed: String
 }
 
 # TODO below we have the original schema, we can slowly reflect this as Sudograph gains features

@@ -4,6 +4,18 @@ import {
     getLines
 } from './utilities';
 
+type CSVBlock = Readonly<{
+    number: number;
+    hash: string;
+    parent_hash: string;
+    transactions_root: string;
+    transaction_count: number;
+    state_root: string;
+    gas_limit: number;
+    gas_used: number;
+    timestamp: number;
+}>;
+
 // import {
 //     sudograph,
 //     gql
@@ -15,18 +27,6 @@ import {
 //     canisterId: 'ryjl3-tyaaa-aaaaa-aaaba-cai'
 // });
 // TODO we can use Sudograph client directly once I add a cjs build
-
-type Block = Readonly<{
-    number: number;
-    hash: string;
-    parent_hash: string;
-    transactions_root: string;
-    transaction_count: number;
-    state_root: string;
-    gas_limit: number;
-    gas_used: number;
-    timestamp: number;
-}>;
 
 importBlockHeaders();
 
@@ -107,25 +107,25 @@ async function getBatchMutation(
     `;
 }
 
-function convertLinesIntoBlocks(lines: ReadonlyArray<string>): ReadonlyArray<Block> {
+function convertLinesIntoBlocks(lines: ReadonlyArray<string>): ReadonlyArray<CSVBlock> {
     return lines.map((line: string) => {
         return convertLineIntoBlock(line);
     });
 }
 
-function convertLineIntoBlock(line: string): Block {
+function convertLineIntoBlock(line: string): CSVBlock {
     return JSON.parse(line);
 }
 
-async function convertBlocksIntoMutations(blocks: ReadonlyArray<Block>): Promise<ReadonlyArray<string>> {
-    const promises = blocks.map(async (block: Block) => {
+async function convertBlocksIntoMutations(blocks: ReadonlyArray<CSVBlock>): Promise<ReadonlyArray<string>> {
+    const promises = blocks.map(async (block: CSVBlock) => {
         return convertBlockIntoMutation(block);
     });
 
     return await Promise.all(promises);
 }
 
-async function convertBlockIntoMutation(block: Block): Promise<string> {
+async function convertBlockIntoMutation(block: CSVBlock): Promise<string> {
     const graphqlActor = await getGraphQLActor();
 
     const result: any = await graphqlActor.graphql_query(

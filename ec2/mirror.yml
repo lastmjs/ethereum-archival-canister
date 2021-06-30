@@ -1,0 +1,18 @@
+Resources:
+  EC2Mirror:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId: ami-03d5c68bab01f3496 # Ubuntu Server 20.04 LTS (HVM), SSD Volume Type
+      InstanceType: t3.small # TODO see if this is performant and stable
+      KeyName: ethereum-archival-canister-mirror
+      SecurityGroupIds:
+        - Ref: EC2MirrorSecurityGroup
+  EC2MirrorSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupName: EC2MirrorSecurityGroup
+      GroupDescription: EC2MirrorSecurityGroup
+      # TODO and make sure to only allow specific ip addresses?? I might want to hide my ip address from the open source repo though
+      SecurityGroupIngress: # TODO I think we only need to change the security group to allow ssh or not...otherwise it can be cutoff?? It only needs outbound capabilities
+        - CidrIp: 0.0.0.0/0
+          IpProtocol: -1

@@ -4,7 +4,11 @@
         "geth-light-sync": ". ./.env && docker run -it -p 8545:8545 -v $GETH_DATA_PATH:/root ethereum/client-go --syncmode light --cache 2048 --http --http.addr 0.0.0.0 --graphql",
         "geth-no-sync": ". ./.env && docker run -it -p 8545:8545 -v $GETH_DATA_PATH:/root ethereum/client-go --syncmode light --cache 2048 --maxpeers 0 --http --http.addr 0.0.0.0 --graphql",
         "import-block-headers": "ts-node --transpile-only importers/importer-block-headers.ts",
-        "import-block-transactions": "ts-node --transpile-only importers/importer-block-transactions.ts"
+        "import-block-transactions": "ts-node --transpile-only importers/importer-block-transactions.ts",
+        "import-live-blocks-local": ". ./.env && ts-node --transpile-only importers/importer-live-blocks.ts",
+        "import-live-blocks-ic": ". ./.env && ts-node --transpile-only importers/importer-live-blocks.ts",
+        "ec2-mirror-deploy": "aws cloudformation deploy --template ec2/mirror.yml --stack-name ethereum-archival-canister-mirror",
+        "ec2-mirror-ssh": "ssh -A -i ec2/ethereum-archival-canister-mirror.pem ubuntu@18.237.217.125"
     },
     "devDependencies": {
         "@types/node": "15.12.2",
@@ -12,6 +16,7 @@
     },
     "dependencies": {
         "node-fetch": "2.6.1",
+        "pm2": "5.1.0",
         "sudograph": "0.2.0-beta.22",
         "ts-node": "10.0.0",
         "typescript": "4.3.2"

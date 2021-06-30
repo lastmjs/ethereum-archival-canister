@@ -59,6 +59,7 @@ export async function getNumLines(
     return index;
 }
 
+// TODO I would be using the sudograph client, but there are some node incompatibilities that I need to work out
 export async function getGraphQLActor() {
     const idlFactory = ({ IDL }: { IDL: any }) => {
         return IDL.Service({
@@ -67,16 +68,29 @@ export async function getGraphQLActor() {
         });
     };
 
+    // TODO next I need to figure out auth so that only the EC2 instance can do mutations
     const agent = new HttpAgent({
         fetch,
-        host: 'http://localhost:8000',
+        host: process.env.HTTP_AGENT_HOST
+        // host: 'http://localhost:8000',
         // host: 'https://ic0.app'
     });
     await agent.fetchRootKey(); // TODO this should be removed in production
     const graphqlActor = Actor.createActor(idlFactory, {
         agent,
-        canisterId: 'rrkah-fqaaa-aaaaa-aaaaq-cai'
+        canisterId: process.env.GRAPHQL_CANISTER_ID ?? ''
     });
 
     return graphqlActor;
+}
+
+// TODO eventually move to a Result system of some sort
+export function checkResultForErrors(result: any) {
+    if (
+        result.errors !== null &&
+        result.errors !== undefined &&
+        result.errors.length > 0
+    ) {
+        throw new Error(JSON.stringify(result, null, 2));
+    }
 }
