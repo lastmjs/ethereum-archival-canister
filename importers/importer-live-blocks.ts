@@ -13,32 +13,38 @@ const fetch = require('node-fetch');
 
 let mirroring = false;
 
-// TODO do I need an explicit try catch up here?
-// TODO I thought the uhandled exception would log or even take down the process?
 setInterval(async () => {
-    if (mirroring === true) {
-        console.log('currently mirroring', new Date());
-        return;
-    }
+    try {
+        if (mirroring === true) {
+            console.log('currently mirroring', new Date());
+            return;
+        }
+        
+        console.log('importing live blocks');
     
-    console.log('importing live blocks');
-
-    mirroring = true;
-
-    const latestMirroredBlockNumber = await getLatestMirroredBlockNumber();
-    console.log('latestMirroredBlockNumber', latestMirroredBlockNumber);
-    const fromBlock = latestMirroredBlockNumber === 0 ? await getLatestBlockNumber() : latestMirroredBlockNumber + 1;
-    console.log('fromBlock', fromBlock);
-    const blocksToMirror = await getBlocksToMirror(fromBlock);
-    console.log('blocksToMirror.length', blocksToMirror.length);
-
-    await mirrorBlocks(blocksToMirror);
-    console.log('blocks mirrored');
-    await deleteBlocks();
-    console.log('blocks deleted');
-    console.log();
-
-    mirroring = false;
+        mirroring = true;
+    
+        const latestMirroredBlockNumber = await getLatestMirroredBlockNumber();
+        console.log('latestMirroredBlockNumber', latestMirroredBlockNumber);
+        const fromBlock = latestMirroredBlockNumber === 0 ? await getLatestBlockNumber() : latestMirroredBlockNumber + 1;
+        console.log('fromBlock', fromBlock);
+        const blocksToMirror = await getBlocksToMirror(fromBlock);
+        console.log('blocksToMirror.length', blocksToMirror.length);
+    
+        await mirrorBlocks(blocksToMirror);
+        console.log('blocks mirrored');
+        await deleteBlocks();
+        console.log('blocks deleted');
+        console.log();
+    
+        mirroring = false;
+    }
+    catch(error) {
+        mirroring = false;
+        
+        console.error(error); // TODO this might not be the best way to handle the error
+        // TODO perhaps we should restart the whole process??
+    }
 }, 1000);
 // TODO consider block reorgs and such, I am not sure what to do in that case
 
@@ -203,7 +209,9 @@ async function deleteBlocks(): Promise<void> {
 
     const numMirroredBlocks = latestMirroredBlockNumber - firstMirroredBlockNumber + 1;
 
-    // TODO just testing for now
+    // TODO this deletion batching system can be messed with to come up with an optimal solution
+    // TODO Right now I just want the thing to work and be robust, so it is very simple
+    // TODO but not optimizing for cycle usage
     const targetAllowedBlocks = 10;
     const deleteBatchSize = 1;
 
