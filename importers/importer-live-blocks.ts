@@ -212,7 +212,7 @@ async function deleteBlocks(): Promise<void> {
     // TODO this deletion batching system can be messed with to come up with an optimal solution
     // TODO Right now I just want the thing to work and be robust, so it is very simple
     // TODO but not optimizing for cycle usage
-    const targetAllowedBlocks = 10;
+    const targetAllowedBlocks = 100000;
     const deleteBatchSize = 5;
 
     if (numMirroredBlocks < targetAllowedBlocks + deleteBatchSize) {
