@@ -13,6 +13,8 @@ const fetch = require('node-fetch');
 
 let mirroring = false;
 
+// TODO do I need an explicit try catch up here?
+// TODO I thought the uhandled exception would log or even take down the process?
 setInterval(async () => {
     if (mirroring === true) {
         console.log('currently mirroring', new Date());
@@ -201,12 +203,15 @@ async function deleteBlocks(): Promise<void> {
 
     const numMirroredBlocks = latestMirroredBlockNumber - firstMirroredBlockNumber + 1;
 
-    const totalAllowedBlocks = 1100;
-    const deleteBatchSize = 100;
+    // TODO just testing for now
+    const targetAllowedBlocks = 10;
+    const deleteBatchSize = 1;
 
-    if (numMirroredBlocks <= totalAllowedBlocks) {
+    if (numMirroredBlocks <= targetAllowedBlocks) {
         return;
     }
+
+    console.log('getting blocks to delete');
 
     const blocksToDelete = await getBlocksToDelete(
         firstMirroredBlockNumber,
@@ -217,6 +222,8 @@ async function deleteBlocks(): Promise<void> {
         return `"${block.id}"`;
     });
 
+    console.log('blockIdsToDelete', blockIdsToDelete);
+
     const transactionIdsToDelete = blocksToDelete.reduce((result: ReadonlyArray<string>, block) => {
         return [
             ...result,
@@ -224,7 +231,8 @@ async function deleteBlocks(): Promise<void> {
         ];
     }, []);
 
-    // TODO we should disconnect the parent blocks as well
+    console.log('transactionIdsToDelete', transactionIdsToDelete);
+
     const mutation = `
         mutation {
             deleteTransaction(input: {
@@ -281,7 +289,7 @@ async function getBlocksToDelete(
             readBlock(search: {
                 number: {
                     gte: ${firstBlockNumber}
-                    lte: ${lastBlockNumber}
+                    lt: ${lastBlockNumber}
                 }
             }) {
                 id
