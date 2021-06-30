@@ -15,7 +15,7 @@ let mirroring = false;
 
 setInterval(async () => {
     if (mirroring === true) {
-        console.log('currently mirroring');
+        console.log('currently mirroring', new Date());
         return;
     }
     
@@ -37,7 +37,7 @@ setInterval(async () => {
     console.log();
 
     mirroring = false;
-}, 30000);
+}, 1000);
 // TODO consider block reorgs and such, I am not sure what to do in that case
 
 async function getLatestMirroredBlockNumber(): Promise<number> {
@@ -134,7 +134,7 @@ async function mirrorBlocks(blocks: ReadonlyArray<GethBlock>): Promise<void> {
         return;
     }
 
-    for (const block of blocks) {
+    const promises = blocks.map(async (block) => {
         console.log('mirroring block', block.number);
         const mutation = `
             mutation {
@@ -188,9 +188,11 @@ async function mirrorBlocks(blocks: ReadonlyArray<GethBlock>): Promise<void> {
         const resultJSON = JSON.parse(resultString);
         
         checkResultForErrors(resultJSON);
-
+    
         console.log('mirrored block', block.number);
-    }
+    });
+
+    await Promise.all(promises);
 }
 
 async function deleteBlocks(): Promise<void> {
